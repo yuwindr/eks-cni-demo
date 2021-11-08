@@ -21,6 +21,10 @@ terraform {
   required_version = ">= 0.15.1"
 }
 
+provider "aws" {
+  region  = "ap-southeast-1"
+}
+
 provider "kubernetes" {
   host                   = aws_eks_cluster.eks_cluster_1.endpoint
   cluster_ca_certificate = base64decode(aws_eks_cluster.eks_cluster_1.certificate_authority[0].data)
