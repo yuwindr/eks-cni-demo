@@ -1,27 +1,9 @@
-## DISCLAIMER
+# EKS CNI Custom Networking Demo
 
 
-Questions:
-- Seems like the default pods `aws-node-xxx` and `kube-proxy-xxx` will use the primary CIDR range (10.x). What is the reason for this? in case customers ask
-- Not sure how to customise such that only 1 nodegroup will have the AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG=true
-https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
+## Disclaimer
 
-## TODO
-1. Change the setup to use existing VPCs - OK
-1. Kubernetes deployments ([useful tutorial to deploy pods to specific nodes](https://medium.com/kubernetes-tutorials/learn-how-to-assign-pods-to-nodes-in-kubernetes-using-nodeselector-and-affinity-features-e62c437f3cf8)) - OK, pendign docker image
-    1. Image A to nodegroup1
-    1. Image B to nodegroup1
-    1. Image A to nodegroup2
-    1. Image B to nodegroup2
-1. Use another VPC and deploy an ec2 that returns the caller's IP address - OK, pending docker image userdata
-1. Create VPC endpoints - ECR, sts, s3 etc. [link](https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html#vpc-endpoints-private-clusters)
-1. Create IAM role for EC2
-1. chmod script
-1. Test IAM role creation using Permissions Boundary
-
-Image list:
-- Image A - SSH-able container
-- Image B - returns caller IP address
+> **This project is used for demo purposes only and should NOT be considered for production use.**
 
 <br>
 
@@ -32,10 +14,10 @@ Image list:
 ### Pre-requisites
 
 1. Create Cloud9 environment with the following inputs
-- Environment type: `Create a new EC2 instance for environment (direct access)`
-- Instance type: `t2.micro`
-- Platform: `Amazon Linux 2`
-- Network settings: choose a public subnet in the VPC where EKS cluster will be deployed
+    - Environment type: `Create a new EC2 instance for environment (direct access)`
+    - Instance type: `t2.micro`
+    - Platform: `Amazon Linux 2`
+    - Network settings: choose a public subnet in the VPC where EKS cluster will be deployed
 
 1. Cloud9 setup
     - Create IAM Role and attach it to Cloud9 instance
@@ -56,8 +38,9 @@ Image list:
         ```
     - Clone the Github repository
         ```bash
-            git clone __
+            git clone https://github.com/yuwindr/eks-cni-demo.git
             # enable scripts to be executed
+            cd eks-cni-demo/
             chmod +x scripts/*.sh
         ```
 
@@ -69,11 +52,15 @@ Image list:
     - For subnet that we want to deploy target EC2 instance, tag it with the following keys and appropriate values:
         - Tier: Private/Public
 
-1. Fill in `terraform.tfvars` with the necessary values
+1. Terraform setup
+    - Create an S3 bucket to store Terraform state files
+    - Create an EC2 Key Pair. This will be used to SSH into the EC2 instances during Verification step later.
+    - Open main.tf and replace the `<bucket-name>` under `backend "s3"` with the bucket name created above. The Terraform state files will be stored there.
+    - Fill in `terraform.tfvars` with the necessary values
 
 <br>
 
-### Deployment steps
+### Terraform deployment
 
 ```bash
     terraform init
@@ -89,30 +76,47 @@ Image list:
 <br>
 
 ### Check cluster details
-- There should be 2 kubectl config contexts added - 1 for cluster 1 (CNI enabled) and 1 for cluster 2 (CNI disabled). The activated context is cluster 1. Run the following commands to get basic information:
+- There will be 2 kubectl config contexts added - 1 for cluster 1 (CNI enabled) and 1 for cluster 2 (CNI disabled). The activated context is cluster 1. Run the following commands to get basic information:
     ```bash
     # you should see 2 nodes
     kubectl get nodes
-
     # you should see 4 pods, 2 for service A, 2 for service B
     # for cluster 1, the IP should be using the secondary CIDR, e.g. 100.x.x.x
+    kubectl get pods -o wide
+    # Take note of one of the Service A pods' IP address and one of the Service B pods' IP address
+
+    # switch context to cluster 2
+    ## copy the context name for cluster 2
+    kubectl config get-contexts
+    kubectl config use-context <cluster 2 context name>
     # for cluster 2, the IP should be using the main CIDR, e.g. 10.x.x.x
     kubectl get pods -o wide
+    # Take note of one of the Service B pods' IP address
     ```
 
 <br>
 
-### SSH into Cluster 1 Service A pod
-- 
+### SSH into Cluster 1 Service A pod and verify network configuration
 
-<br>
+- Go to EC2 console and SSH into one of the Cluster 1 EC2 instances (using the key pair created)
+    ```bash
+        ssh -i <keypair name>.pem ec2-user@<EC2 instance public IP address>
 
-### Use Busybox image
-- Alternatively, we can use Busybox image to create a temporary container in the cluster (similar functionality to Service A)
-    ```
-    kubectl run -i --rm --tty debug --image=busybox -- sh
-    curl nginx -O -
-    curl <IP address> -O -
+        # SSH into Service A, use demoPW839x as password
+        ssh userdemo@<IP address>
+        
+        # Scenario 1 - Make an HTTP Call to ifconfig.me - should return a public IP
+        wget -qO- ifconfig.me
+
+        # Scenario 2 - Make an HTTP Call to target EC2 - should return a 10.x IP
+        ## private IP address is printed in Terraform outputs
+        wget -qO- <private IP address of EC2 instance>
+
+        # Scenario 3 - Make an HTTP Call to Cluster 1 Service B - should return a 100.x IP
+        wget -qO- <Cluster 1 Service B IP address, should be 100.x IP>
+
+        # Scenario 4 - Make an HTTP Call to Cluster 2 Service B - should return a 100.x IP
+        wget -qO- <Cluster 1 Service B IP address, should be 10.x IP>
     ```
 
 <br>
@@ -139,17 +143,6 @@ If terraform apply fails with `Permission denied` error for either `annotate-nod
 
 <br>
 
-## Deploy an application (nginx)
-
-```
-kubectl create deployment nginx --image=nginx
-kubectl scale --replicas=3 deployments/nginx
-kubectl expose deployment/nginx --type=NodePort --port 80
-kubectl get pods -o wide
-```
-
-<br>
-
 ## References
-- Starting Terraform files + Terraform modules from ftseng@
+- Starting Terraform files + Terraform modules from @ftseng
 - Scripts to enable CNI and annotate nodes taken from [here](https://tf-eks-workshop.workshop.aws/500_eks-terraform-workshop/570_advanced-networking.html)

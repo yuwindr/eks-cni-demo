@@ -175,7 +175,8 @@ resource "null_resource" "cluster_2_enable_cni_pod_sg" {
   depends_on = [
     aws_eks_cluster.eks_cluster_1,
     aws_eks_cluster.eks_cluster_2,
-    null_resource.add_kubeconfig
+    null_resource.add_kubeconfig,
+    null_resource.cluster_1_enable_cni
   ]
 
   provisioner "local-exec" {

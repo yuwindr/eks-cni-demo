@@ -20,13 +20,6 @@ EoF
 
 echo "created pod-sg-policy.yaml"
 
-# # cluster 1
-# aws eks update-kubeconfig --name $cn1
-# kubectl set env ds aws-node -n kube-system ENABLE_POD_ENI=true
-# # Apply the CRD config
-# echo "apply the pod-sg CRD for $cn1"
-# kubectl apply -f pod-sg-policy.yaml
-
 # cluster 2
 aws eks update-kubeconfig --name $cn2
 kubectl set env ds aws-node -n kube-system ENABLE_POD_ENI=true
