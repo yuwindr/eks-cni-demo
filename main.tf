@@ -13,18 +13,12 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "tf-bucket-chariswn-container"
+    bucket  = "<bucket-name>"
     key     = "terraform.tfstate"
     region  = "ap-southeast-1"
-    profile = "chariswn+Container-tf-user"
   }
 
   required_version = ">= 0.15.1"
-}
-
-provider "aws" {
-  profile = "chariswn+Container-tf-user"
-  region  = "ap-southeast-1"
 }
 
 provider "kubernetes" {
