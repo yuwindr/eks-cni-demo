@@ -55,8 +55,8 @@
         - Tier: Private/Public
         - CIDR: Main/Secondary
         - *E.g. for public subnet in the main VPC CIDR range (10.0.0.0/16), it should have tags `Tier=Public` and `CIDR=Main`.*
-        - *Note: this template expects 1 public and 1 private subnet in each of the two AZs: ap-southeast-1a and ap-southeast-1b*
-    - For subnet that we want to deploy target EC2 instance, tag it with the following keys and appropriate values:
+        - *Note: this template expects 1 public and 1 private subnet in each of the two AZs: ap-southeast-1a and ap-southeast-1b in each CIDR (primary and secondary)*
+    - In the VPC that we want to deploy target EC2 instance into, tag the Public subnet in ap-southeast-1a AZ with the following keys and appropriate values:
         - Tier: Private/Public
         - *Note: this template expects 1 public subnet in ap-southeast-1a AZ*
 
@@ -88,7 +88,7 @@
     ```bash
     # you should see 2 nodes
     kubectl get nodes
-    # you should see 4 pods, 2 for service A, 2 for service B
+    # you should see 8 pods, 4 for service A, 4 for service B
     # for cluster 1, the IP should be using the secondary CIDR, e.g. 100.x.x.x
     kubectl get pods -o wide
     # Take note of one of the Service A pods' IP address and one of the Service B pods' IP address
