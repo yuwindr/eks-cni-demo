@@ -10,7 +10,7 @@ aws eks update-kubeconfig --name $CLUSTER1
 echo "Setting kubectl config context for both clusters done."
 echo "Adding rules to control plane security groups for both clusters."
 sg1=$(aws eks describe-cluster --name $CLUSTER1 --query cluster.resourcesVpcConfig.clusterSecurityGroupId --output text)
-aws ec2 authorize-security-group-ingress --group-id $sg --protocol all --port -1 --cidr $cidr
+aws ec2 authorize-security-group-ingress --group-id $sg1 --protocol all --port -1 --cidr $cidr
 sg2=$(aws eks describe-cluster --name $CLUSTER2 --query cluster.resourcesVpcConfig.clusterSecurityGroupId --output text)
-aws ec2 authorize-security-group-ingress --group-id $sg --protocol all --port -1 --cidr $cidr
+aws ec2 authorize-security-group-ingress --group-id $sg2 --protocol all --port -1 --cidr $cidr
 echo "Adding rules to control plane security groups done."

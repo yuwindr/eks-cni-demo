@@ -220,7 +220,6 @@ resource "null_resource" "annotate_nodes" {
         echo -e "\x1B[33mAnnotate nodes ......\x1B[0m"
         ./scripts/annotate-nodes.sh $az1 $az2 $sub1 $sub2 $cn $ng $customsg
         echo -e "\x1B[32mShould see coredns on 100.64.x.y addresses now\x1B[0m"
-        echo -e "\x1B[32mkubectl get pods -A -o wide | grep coredns\x1B[0m"   
      EOT
   }
 }
