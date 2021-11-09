@@ -139,8 +139,9 @@ resource "null_resource" "add_kubeconfig" {
     command     = <<EOT
         cn1=$(echo ${aws_eks_cluster.eks_cluster_1.name} | tr -d '[:space:]')
         cn2=$(echo ${aws_eks_cluster.eks_cluster_2.name} | tr -d '[:space:]')
+        cidr=$(echo ${var.vpc_main_cidr} | tr -d '[:space:]')
         echo -e "\x1B[35mAdding Kubeconfig......\x1B[0m"
-        ./scripts/add-kubeconfig.sh $cn1 $cn2
+        ./scripts/add-kubeconfig.sh $cn1 $cn2 $cidr
      EOT
   }
 }
