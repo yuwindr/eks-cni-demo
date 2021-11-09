@@ -40,7 +40,6 @@ resource "aws_instance" "target_ec2" {
         service docker start
         usermod -a -G docker ec2-user
         chkconfig docker on
-        aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 500605182284.dkr.ecr.ap-southeast-1.amazonaws.com    
         docker pull ${var.serviceA_container_image}
         docker run -p 20:22 -d --rm ${var.serviceA_container_image}
         docker pull ${var.serviceB_container_image}
