@@ -92,14 +92,6 @@
     # for cluster 1, the IP should be using the secondary CIDR, e.g. 100.x.x.x
     kubectl get pods -o wide
     # Take note of one of the Service A pods' IP address and one of the Service B pods' IP address
-
-    # switch context to cluster 2
-    ## copy the context name for cluster 2
-    kubectl config get-contexts
-    kubectl config use-context <cluster 2 context name>
-    # for cluster 2, the IP should be using the main CIDR, e.g. 10.x.x.x
-    kubectl get pods -o wide
-    # Take note of one of the Service B pods' IP address
     ```
 
 <br>
