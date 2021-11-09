@@ -17,7 +17,7 @@
     - Environment type: `Create a new EC2 instance for environment (direct access)`
     - Instance type: `t2.micro`
     - Platform: `Amazon Linux 2`
-    - Network settings: choose a public subnet in the VPC where EKS cluster will be deployed
+    - Network settings: choose a public subnet in the primary CIDR range of the VPC where EKS cluster will be deployed
 
 1. Cloud9 setup
     - Create IAM Role and attach it to Cloud9 instance
@@ -35,6 +35,12 @@
             kubectl completion bash >>  ~/.bash_completion
             . /etc/profile.d/bash_completion.sh
             . ~/.bash_completion
+
+            sudo yum -y install jq gettext bash-completion moreutils
+
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
         ```
     - Clone the Github repository
         ```bash
@@ -49,8 +55,10 @@
         - Tier: Private/Public
         - CIDR: Main/Secondary
         - *E.g. for public subnet in the main VPC CIDR range (10.0.0.0/16), it should have tags `Tier=Public` and `CIDR=Main`.*
+        - *Note: this template expects 1 public and 1 private subnet in each of the two AZs: ap-southeast-1a and ap-southeast-1b*
     - For subnet that we want to deploy target EC2 instance, tag it with the following keys and appropriate values:
         - Tier: Private/Public
+        - *Note: this template expects 1 public subnet in ap-southeast-1a AZ*
 
 1. Terraform setup
     - Create an S3 bucket to store Terraform state files
@@ -98,25 +106,22 @@
 
 ### SSH into Cluster 1 Service A pod and verify network configuration
 
-- Go to EC2 console and SSH into one of the Cluster 1 EC2 instances (using the key pair created)
     ```bash
-        ssh -i <keypair name>.pem ec2-user@<EC2 instance public IP address>
-
         # SSH into Service A, use demoPW839x as password
-        ssh userdemo@<IP address>
+        ssh userdemo@<IP address of Cluster 1 Service A, should be 100.x IP>
         
         # Scenario 1 - Make an HTTP Call to ifconfig.me - should return a public IP
-        wget -qO- ifconfig.me
+        curl ifconfig.me
 
         # Scenario 2 - Make an HTTP Call to target EC2 - should return a 10.x IP
         ## private IP address is printed in Terraform outputs
-        wget -qO- <private IP address of EC2 instance>
+        curl <private IP address of EC2 instance>
 
         # Scenario 3 - Make an HTTP Call to Cluster 1 Service B - should return a 100.x IP
-        wget -qO- <Cluster 1 Service B IP address, should be 100.x IP>
+        curl <Cluster 1 Service B IP address, should be 100.x IP>
 
         # Scenario 4 - Make an HTTP Call to Cluster 2 Service B - should return a 100.x IP
-        wget -qO- <Cluster 1 Service B IP address, should be 10.x IP>
+        curl <Cluster 1 Service B IP address, should be 10.x IP>
     ```
 
 <br>
@@ -132,14 +137,6 @@ ROLE_ARN=$(aws iam get-role --role-name <IAM Role Name> --query "Role.Arn" --out
 eksctl create iamidentitymapping --cluster <Cluster Name> --arn ${ROLE_ARN} --group system:masters --username admin
 kubectl describe configmap -n kube-system aws-auth
 ```
-
-<br>
-
-## Troubleshooting
-
-If terraform apply fails with `Permission denied` error for either `annotate-nodes.sh` or `cni-cycle-nodes.sh`, run the following commands:
-`chmod +x annotate-nodes.sh`
-`chmod +x enable-cni.sh`
 
 <br>
 
