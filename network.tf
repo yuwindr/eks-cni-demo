@@ -84,6 +84,17 @@ data "aws_subnet" "ec2_public_subnet" {
   }
 }
 
+# resource "aws_subnet" "ec2_public_subnet" {
+#   vpc_id     = data.aws_vpc.ec2_vpc.id
+#   cidr_block = cidrsubnet(var.ec2_vpc_main_cidr, 0, 0)
+#   availability_zone = "ap-southeast-1a"
+#   map_public_ip_on_launch = true
+#   tags = {
+#     Name = "Public Subnet"
+#     Tier = "Public"
+#   }
+# }
+
 resource "aws_security_group" "eks_pod_sg" {
   name        = "eks_sg_allow_from_vpc"
   description = "Allow all traffic from VPC"

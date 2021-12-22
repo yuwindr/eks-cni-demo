@@ -93,8 +93,9 @@
             - In total there should be 8 subnets (4 in primary CIDR, 4 in secondary CIDR)
         - `ec2_vpc_id`: VPC ID where target Docker EC2 instance will be launched into
             - This VPC should have 1 public subnet in AZ `ap-southeast-1a`
-        - `vpc_main_cidr`: primary CIDR range of the EKS VPC (e.g. `10.0.0.0/16`)
-        - `vpc_secondary_cidr`: secondary CIDR range of the EKS VPC (e.g. `100.64.0.0/16`)
+        - `eks_vpc_main_cidr`: primary CIDR range of the EKS VPC (e.g. `10.0.0.0/16`)
+        - `eks_vpc_secondary_cidr`: secondary CIDR range of the EKS VPC (e.g. `100.64.0.0/16`)
+        - `ec2_vpc_main_cidr`: primary CIDR range of the EC2 VPC (e.g. `10.0.0.0/16`)
         - `eks_cluster_name`: name of the EKS cluster
         - `key_pair_name`: name of the key pair created above
         - `ec2_ami_id`: AMI ID used for the EC2 instance. The default value is the Amazon Linux 2 AMI in ap-southeast-1 region.
@@ -151,5 +152,6 @@ curl <Cluster 1 Service B IP address, should be 10.x IP>
 
 
 ## References
+- Container images by @chariswn
 - Starting Terraform files + Terraform modules from @ftseng
 - Scripts to enable CNI and annotate nodes taken from [here](https://tf-eks-workshop.workshop.aws/500_eks-terraform-workshop/570_advanced-networking.html)

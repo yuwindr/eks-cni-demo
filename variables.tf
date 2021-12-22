@@ -26,16 +26,22 @@ variable "ec2_vpc_id" {
     type = string
 }
 
-variable "vpc_main_cidr" {
+variable "eks_vpc_main_cidr" {
     description = "Main CIDR block of the VPC"
     type = string
     default = "10.0.0.0/16"
 }
 
-variable "vpc_secondary_cidr" {
+variable "eks_vpc_secondary_cidr" {
     description = "Secondary CIDR block of the VPC"
     type = string
     default = "100.64.0.0/16"
+}
+
+variable "ec2_vpc_main_cidr" {
+    description = "Main CIDR block of the VPC"
+    type = string
+    default = "10.0.0.0/16"
 }
 
 variable "eks_cluster_name" {
