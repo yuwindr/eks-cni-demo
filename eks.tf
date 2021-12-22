@@ -47,7 +47,7 @@ resource "aws_eks_cluster" "eks_cluster_1" {
   name     = "${var.eks_cluster_name}_1"
   role_arn = aws_iam_role.eks_cluster_iam_role.arn
   vpc_config {
-    subnet_ids              = concat(tolist(data.aws_subnet_ids.main_public_subnets.ids), tolist(data.aws_subnet_ids.main_private_subnets.ids))
+    subnet_ids              = concat(tolist(data.aws_subnet_ids.main_public_subnets.ids))
     endpoint_private_access = true
     endpoint_public_access  = true
   }
@@ -98,7 +98,7 @@ resource "null_resource" "add_kubeconfig" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<EOT
         cn1=$(echo ${aws_eks_cluster.eks_cluster_1.name} | tr -d '[:space:]')
-        cidr=$(echo ${var.vpc_main_cidr} | tr -d '[:space:]')
+        cidr=$(echo ${var.eks_vpc_main_cidr} | tr -d '[:space:]')
         echo -e "\x1B[35mAdding Kubeconfig......\x1B[0m"
         ./scripts/add-kubeconfig.sh $cn1 $cidr
      EOT
@@ -143,10 +143,10 @@ resource "null_resource" "annotate_nodes" {
     when        = create
     interpreter = ["/bin/bash", "-c"]
     command     = <<EOT
-        az1=$(echo ${data.aws_subnet.secondary_public_subnet_1a.availability_zone} | tr -d '[:space:]')
-        az2=$(echo ${data.aws_subnet.secondary_public_subnet_1b.availability_zone} | tr -d '[:space:]')
-        sub1=$(echo ${data.aws_subnet.secondary_public_subnet_1a.id} | tr -d '[:space:]')
-        sub2=$(echo ${data.aws_subnet.secondary_public_subnet_1b.id} | tr -d '[:space:]')
+        az1=$(echo ${aws_subnet.secondary_public_subnet_1a.availability_zone} | tr -d '[:space:]')
+        az2=$(echo ${aws_subnet.secondary_public_subnet_1b.availability_zone} | tr -d '[:space:]')
+        sub1=$(echo ${aws_subnet.secondary_public_subnet_1a.id} | tr -d '[:space:]')
+        sub2=$(echo ${aws_subnet.secondary_public_subnet_1b.id} | tr -d '[:space:]')
         cn=$(echo ${aws_eks_cluster.eks_cluster_1.name} | tr -d '[:space:]')
         ng=$(echo ${aws_eks_node_group.cluster_1_node_group1.node_group_name} | tr -d '[:space:]')
         customsg=$(echo ${aws_security_group.eks_pod_sg.id} | tr -d '[:space:]')

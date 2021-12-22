@@ -10,31 +10,67 @@ data "aws_subnet_ids" "main_public_subnets" {
   }
 }
 
-data "aws_subnet_ids" "main_private_subnets" {
-  vpc_id = data.aws_vpc.eks_vpc.id
-  tags = {
-    Tier = "Private"
-    CIDR = "Main"
-  }
-}
+# resource "aws_subnet" "main_public_subnet_1a" {
+#   vpc_id     = data.aws_vpc.eks_vpc.id
+#   cidr_block = cidrsubnet(var.eks_vpc_main_cidr, 1, 0)
+#   availability_zone = "ap-southeast-1a"
+#   map_public_ip_on_launch = true
+#   tags = {
+#     Name = "Public Subnet 1"
+#   }
+# }
 
-data "aws_subnet" "secondary_public_subnet_1a" {
-  vpc_id            = data.aws_vpc.eks_vpc.id
+# resource "aws_subnet" "main_public_subnet_1b" {
+#   vpc_id     = data.aws_vpc.eks_vpc.id
+#   cidr_block = cidrsubnet(var.eks_vpc_main_cidr, 1, 1)
+#   availability_zone = "ap-southeast-1b"
+#   map_public_ip_on_launch = true
+#   tags = {
+#     Name = "Public Subnet 2"
+#   }
+# }
+
+resource "aws_subnet" "secondary_public_subnet_1a" {
+  vpc_id     = data.aws_vpc.eks_vpc.id
+  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 8, 0)
   availability_zone = "ap-southeast-1a"
+  map_public_ip_on_launch = true
   tags = {
+    Name = "Secondary Public Subnet 1"
     Tier = "Public"
     CIDR = "Secondary"
   }
 }
 
-data "aws_subnet" "secondary_public_subnet_1b" {
-  vpc_id            = data.aws_vpc.eks_vpc.id
+resource "aws_subnet" "secondary_public_subnet_1b" {
+  vpc_id     = data.aws_vpc.eks_vpc.id
+  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 8, 1)
   availability_zone = "ap-southeast-1b"
+  map_public_ip_on_launch = true
   tags = {
+    Name = "Secondary Public Subnet 2"
     Tier = "Public"
     CIDR = "Secondary"
   }
 }
+
+# data "aws_subnet" "secondary_public_subnet_1a" {
+#   vpc_id            = data.aws_vpc.eks_vpc.id
+#   availability_zone = "ap-southeast-1a"
+#   tags = {
+#     Tier = "Public"
+#     CIDR = "Secondary"
+#   }
+# }
+
+# data "aws_subnet" "secondary_public_subnet_1b" {
+#   vpc_id            = data.aws_vpc.eks_vpc.id
+#   availability_zone = "ap-southeast-1b"
+#   tags = {
+#     Tier = "Public"
+#     CIDR = "Secondary"
+#   }
+# }
 
 data "aws_vpc" "ec2_vpc" {
   id = var.ec2_vpc_id
@@ -59,7 +95,7 @@ resource "aws_security_group" "eks_pod_sg" {
       from_port        = 0
       to_port          = 0
       protocol         = -1
-      cidr_blocks      = ["${var.vpc_main_cidr}"]
+      cidr_blocks      = ["${var.eks_vpc_main_cidr}"]
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       security_groups  = []
@@ -70,7 +106,7 @@ resource "aws_security_group" "eks_pod_sg" {
       from_port        = 0
       to_port          = 0
       protocol         = -1
-      cidr_blocks      = ["${var.vpc_secondary_cidr}"]
+      cidr_blocks      = ["${var.eks_vpc_secondary_cidr}"]
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       security_groups  = []
