@@ -1,5 +1,5 @@
 resource "aws_iam_role" "eks_cluster_iam_role" {
-  name = "eks-cluster-iam-role"
+  name = "${var.eks_cluster_name}-cluster-iam-role"
   assume_role_policy = jsonencode({
 
     "Version" : "2012-10-17",
@@ -21,7 +21,7 @@ resource "aws_iam_role" "eks_cluster_iam_role" {
 }
 
 resource "aws_iam_role" "eks_node_group_iam_role" {
-  name = "eks-node-group-iam-role"
+  name = "${var.eks_cluster_name}-node-group-iam-role"
   assume_role_policy = jsonencode({
 
     "Version" : "2012-10-17",
@@ -44,7 +44,7 @@ resource "aws_iam_role" "eks_node_group_iam_role" {
 }
 
 resource "aws_eks_cluster" "eks_cluster_1" {
-  name     = "${var.eks_cluster_name}_1"
+  name     = "${var.eks_cluster_name}"
   role_arn = aws_iam_role.eks_cluster_iam_role.arn
   vpc_config {
     subnet_ids              = concat(tolist(data.aws_subnet_ids.main_public_subnets.ids))
@@ -56,7 +56,7 @@ resource "aws_eks_cluster" "eks_cluster_1" {
 
 resource "aws_eks_node_group" "cluster_1_node_group1" {
   cluster_name    = aws_eks_cluster.eks_cluster_1.name
-  node_group_name = "cluster_1_node_group1"
+  node_group_name = "${var.eks_cluster_name}-cluster_1_node_group1"
   node_role_arn   = aws_iam_role.eks_node_group_iam_role.arn
   subnet_ids      = data.aws_subnet_ids.main_public_subnets.ids
   instance_types  = ["m5.large"]

@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_iam_role" {
-  name = "ec2-instance-iam-role"
+  # name = "ec2-instance-iam-role"
   assume_role_policy = jsonencode({
 
     "Version" : "2012-10-17",
@@ -20,7 +20,7 @@ resource "aws_iam_role" "ec2_iam_role" {
 }
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "ec2-instance-iam-role"
+  # name = "ec2-instance-iam-role"
   role = aws_iam_role.ec2_iam_role.name
 }
 
