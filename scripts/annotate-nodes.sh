@@ -10,7 +10,7 @@ customsg=$(echo $7 | tr -d '[:space:]')
 kubectl get crd
 # get the SG's
 # get a list of the insytances in the node group
-comm=`printf "aws ec2 describe-instances --query 'Reservations[*].Instances[*].InstanceId' --filters \"Name=tag-key,Values=eks:nodegroup-name\" \"Name=tag-value,Values=${nodeGroupName}\" \"Name=instance-state-name,Values=running\" --output text"`
+comm=`printf "aws ec2 describe-instances --query 'Reservations[*].Instances[*].InstanceId' --filters \"Name=tag-key,Values=eks:nodegroup-name\" \"Name=tag-value,Values=${nodeGroupName}\" \"Name=tag-key,Values=eks:cluster-name\" \"Name=tag-value,Values=${CLUSTER}\" \"Name=instance-state-name,Values=running\" --output text"`
 INSTANCE_IDS=(`eval $comm`)
 # extract the security groups
 for i in "${INSTANCE_IDS[0]}"
