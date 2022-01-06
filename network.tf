@@ -32,7 +32,7 @@ data "aws_subnet_ids" "main_public_subnets" {
 
 resource "aws_subnet" "secondary_public_subnet_1a" {
   vpc_id     = data.aws_vpc.eks_vpc.id
-  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 8, 0)
+  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 2, 0)
   availability_zone = "ap-southeast-1a"
   map_public_ip_on_launch = true
   tags = {
@@ -44,7 +44,7 @@ resource "aws_subnet" "secondary_public_subnet_1a" {
 
 resource "aws_subnet" "secondary_public_subnet_1b" {
   vpc_id     = data.aws_vpc.eks_vpc.id
-  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 8, 1)
+  cidr_block = cidrsubnet(var.eks_vpc_secondary_cidr, 2, 1)
   availability_zone = "ap-southeast-1b"
   map_public_ip_on_launch = true
   tags = {
